@@ -2,8 +2,9 @@
 
 一个 Windows 桌面红绿灯小组件，用来提示 Codex 当前状态：正在工作、等待你处理、已完成或空闲，并在浮窗底部显示 Codex 5 小时和 1 周剩余额度百分比。
 
-本项目是基于原作者的 macOS 项目修改而来的 Windows 版本。感谢原作者的开源工作：
+本项目是基于原作者 [langkonzil](https://github.com/langkonzil) 的 macOS 项目修改而来的 Windows 版本。感谢原作者的开源工作：
 
+- 原作者：[langkonzil](https://github.com/langkonzil)
 - 原项目：[langkonzil/codex-traffic-light-mxp](https://github.com/langkonzil/codex-traffic-light-mxp.git)
 - 原项目许可证：Apache License 2.0
 
@@ -248,6 +249,12 @@ codex-light-mxp clear
 - 增加 Windows hooks 安装脚本
 - 增加 Windows 托盘菜单、提示音和运行时路径
 - 适配 `%APPDATA%\CodexTrafficLight` 状态目录
+
+原作者：
+
+```text
+https://github.com/langkonzil
+```
 
 原作者项目地址：
 
