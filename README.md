@@ -1,338 +1,146 @@
-﻿# Codex Traffic Light MXP
+# Codex Traffic Light for Windows
 
-Codex Traffic Light MXP 是一个 macOS 菜单栏和悬浮交通灯工具，用颜色提示 Codex 当前状态：正在执行、等待你处理、已完成或空闲。
+一个 Windows 桌面红绿灯小组件，用来提示 Codex 当前状态：正在工作、等待你处理、已完成或空闲，并在浮窗底部显示 Codex 5 小时和 1 周剩余额度百分比。
+
+本项目是基于原作者的 macOS 项目修改而来的 Windows 版本。感谢原作者的开源工作：
+
+- 原项目：[langkonzil/codex-traffic-light-mxp](https://github.com/langkonzil/codex-traffic-light-mxp.git)
+- 原项目许可证：Apache License 2.0
+
+本仓库继续保留 Apache License 2.0。
 
 ## 功能概览
 
-- 菜单栏状态灯：常驻 macOS 菜单栏，方便快速查看状态。
-- 悬浮交通灯：在桌面上显示更醒目的状态提示。
-- Codex Hooks 集成：根据 Codex 的 hook 事件自动更新任务状态。
-- 命令行控制：可手动设置状态、查询状态、清空状态或退出应用。
-- 多任务聚合：多个 Codex 任务同时存在时，按优先级显示最需要关注的状态。
-- 剩余额度展示：浮窗底部可显示 Codex 5 小时和 1 周剩余额度百分比。
+- Windows 悬浮红绿灯：桌面显示红、黄、绿三种状态灯。
+- 系统托盘菜单：可显示/隐藏窗口、静音、手动切换状态、清空失联任务、退出。
+- Codex Hooks 集成：根据 Codex hook 事件自动更新状态。
+- 等待提醒：需要你回复、确认或授权时显示红灯并闪烁。
+- 完成提醒：任务完成时显示绿灯并播放提示音。
+- 多任务聚合：多个 Codex 任务同时存在时，优先显示最需要关注的状态。
+- 额度显示：浮窗底部显示 Codex 5 小时和 1 周剩余额度。
+- Windows 开机自启：可在设置面板中开启或关闭。
 
 ## 状态说明
 
-| 颜色 | 状态 | 含义 | 提示行为 |
+| 颜色 | 状态 | 含义 | 行为 |
 | --- | --- | --- | --- |
-| 黄灯 | `working` | Codex 正在工作 | 静默显示 |
-| 绿灯 | `done` | 任务已完成，可以验收 | 播放 `Glass` 3 秒，10 分钟后自动回到空闲 |
-| 红灯 | `waiting` | 需要你回复、确认、授权或补充文件 | 闪烁并播放 `Basso` 10 秒，随后保持红灯静默 |
+| 红灯 | `waiting` | Codex 正在等待你回复、确认、授权或补充信息 | 闪烁并播放提示音 |
+| 黄灯 | `working` | Codex 正在执行任务 | 静默显示 |
+| 绿灯 | `done` | 任务已完成，可以验收 | 播放完成提示音 |
 | 暗灯 | `idle` | 没有活跃任务 | 静默显示 |
 
 多个任务同时存在时，聚合状态按以下优先级计算：
 
-1. 只要有任一任务处于 `waiting`，显示红灯。
-2. 否则只要有任一任务处于 `working`，显示黄灯。
-3. 否则如果最近 10 分钟内有任务处于 `done`，显示绿灯。
-4. 其他情况显示 `idle`。
+1. 只要有任务处于 `waiting`，显示红灯。
+2. 否则只要有任务处于 `working`，显示黄灯。
+3. 否则如果有最近完成的任务，短暂显示绿灯。
+4. 其他情况显示暗灯。
 
 ## 环境要求
 
-- macOS 13 或更高版本
-- Swift 6 工具链
-- Codex Hooks 可用的 Codex 配置环境
+- Windows 系统
+- 已安装并可正常使用 Codex
+- Codex Hooks 可用
+- 构建时需要系统自带的 .NET Framework C# 编译器
 
-## 构建
+Windows 构建脚本默认使用：
+
+```powershell
+C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe
+```
+
+不需要额外安装 .NET SDK。
+
+## 构建 Windows 版本
 
 在项目根目录运行：
-
-```bash
-./build.command
-```
-
-构建产物位于：
-
-```text
-.build/release/CodexTrafficLightApp
-.build/release/codex-light-mxp
-.build/release/codex-light-hook-mxp
-```
-
-## 快速启动
-
-构建后可以直接启动菜单栏应用：
-
-```bash
-.build/release/CodexTrafficLightApp
-```
-
-启动后，macOS 菜单栏会出现 Codex 状态灯。红灯或绿灯时会自动显示悬浮交通灯；黄灯默认只在菜单栏显示，减少打扰。
-
-## 安装命令行工具
-
-运行：
-
-```bash
-./install-global-command.command
-```
-
-脚本会先执行 release 构建，然后把命令软链接安装到：
-
-```text
-~/.codex/bin/codex-light-mxp
-~/.codex/bin/codex-light-hook-mxp
-```
-
-确保 `~/.codex/bin` 在你的 `PATH` 中：
-
-```bash
-export PATH="$HOME/.codex/bin:$PATH"
-```
-
-## 命令行用法
-
-常用命令：
-
-```bash
-codex-light-mxp working
-codex-light-mxp done
-codex-light-mxp waiting
-codex-light-mxp idle
-codex-light-mxp status
-codex-light-mxp clear
-codex-light-mxp quit
-codex-light-mxp quota --app-server
-codex-light-mxp quota --five-hour 72 --weekly 48
-printf '%s' '{"quota":{"five_hour_remaining_percent":72,"weekly_remaining_percent":48}}' | codex-light-mxp quota --stdin
-```
-
-可选参数：
-
-```bash
-codex-light-mxp --task <task-id> working
-codex-light-mxp --workspace <path> done
-codex-light-mxp --json status
-codex-light-mxp quota --app-server --json
-codex-light-mxp quota --five-hour 72 --weekly 48 --json
-codex-light-mxp quota --stdin --json
-```
-
-参数说明：
-
-- `--task <task-id>`：指定要更新的任务 ID。
-- `--workspace <path>`：指定任务所在工作区。
-- `--json`：以 JSON 格式输出状态快照。
-- `quota --app-server`：通过本机 Codex app-server 的 `account/rateLimits/read` 读取 5 小时和 1 周额度，并写入状态文件。
-- `quota --five-hour <0-100> --weekly <0-100>`：更新浮窗底部显示的 Codex 5 小时和 1 周剩余额度百分比。
-- `quota --stdin`：从标准输入读取 JSON，提取 `five_hour_remaining_percent` / `weekly_remaining_percent` 或 `fiveHourRemainingPercent` / `weeklyRemainingPercent`。
-
-App 启动后会自动尝试采集一次额度，之后每 5 分钟轮询一次。采集依赖 Codex CLI 的实验性 `app-server` 协议；如果 Codex 升级导致协议变化或网络波动，采集失败时会保留上一次额度，不会清空现有显示。
-
-`quota --app-server` 会为 Codex app-server 冷启动留出更宽的时间：
-
-- `initialize` 最多等待 50 秒。
-- `account/rateLimits/read` 最多等待 20 秒。
-- 失败后会重试 2 次，总共最多尝试 3 次。
-- 每次尝试都会重新启动独立的 `codex app-server --stdio` 进程。
-
-## 接入 Codex Hooks
-
-把 `Docs/hooks.example.toml` 中的配置复制到 `~/.codex/config.toml`，然后在 Codex 中运行 `/hooks`，检查并信任这些 hook 命令。
-
-本项目要求 hook 命令使用新名称：
-
-```text
-codex-light-hook-mxp
-```
-
-如果之前配置过旧版 `codex-light-hook`，需要删除旧 hooks 配置和旧 `[hooks.state]` 信任状态，然后重新运行 `/hooks` 生成新的信任记录。
-
-Hook 行为：
-
-- `UserPromptSubmit` / `PreToolUse`：任务进入 `working`。
-- `PermissionRequest`：任务进入 `waiting`。
-- `Stop` / `SubagentStop`：任务进入 `done`，但如果最后一条助手消息看起来仍在等待用户输入，则不会标记为完成。
-- 如果 hook payload 同时包含额度字段，会同步更新 `quota`。
-- 如果 Codex 版本提供 `account/rateLimits/updated`、`RateLimitsUpdated` 或 `AccountRateLimitsUpdated` 这类额度事件，`codex-light-hook-mxp` 会只更新 `quota`，不创建任务。
-
-## 运行时文件
-
-默认状态和偏好设置保存在：
-
-```text
-~/Library/Application Support/CodexTrafficLight/state.json
-~/Library/Application Support/CodexTrafficLight/preferences.json
-~/Library/Application Support/CodexTrafficLight/hook-mxp.log
-~/Library/Application Support/CodexTrafficLight/quota-mxp.log
-```
-
-测试或隔离运行时，可以通过环境变量覆盖状态文件路径：
-
-```bash
-CODEX_TRAFFIC_LIGHT_STATE_PATH=/tmp/codex-light-state.json codex-light-mxp status
-```
-
-状态文件包含任务状态和可选的额度信息：
-
-```json
-{
-  "aggregate_state": "waiting",
-  "updated_at": 1781189000.123,
-  "quota": {
-    "five_hour_remaining_percent": 72,
-    "weekly_remaining_percent": 48,
-    "source": "cli",
-    "updated_at": 1781189000.123
-  },
-  "tasks": {}
-}
-```
-
-`quota` 是账号级信息，`codex-light-mxp clear` 只清空任务状态，默认保留已有额度百分比。
-
-如果浮窗显示 `--`，通常说明当前状态文件还没有 `quota` 字段，或者本机 Codex app-server 暂时没有返回可识别的 5 小时/1 周额度。可以先手动触发采集：
-
-```bash
-codex-light-mxp quota --app-server --json
-```
-
-如果命令失败，查看采集日志：
-
-```bash
-tail -n 50 "$HOME/Library/Application Support/CodexTrafficLight/quota-mxp.log"
-```
-
-App 后台自动采集失败时只写日志，不会弹窗、不改灯色，也不会把旧额度改成 `--`。相同失败 10 分钟内最多记录一次；错误类型变化或下一次成功后再次失败，会重新记录。
-
-本工具不会读取 Codex 私有数据库、私有日志或 auth token。app-server 不可用时，可以临时用 `codex-light-mxp quota --five-hour 72 --weekly 48` 手动写入。
-
-排查 Codex 是否真的触发 hook 时，可以查看最近的 hook 日志：
-
-```bash
-tail -n 50 "$HOME/Library/Application Support/CodexTrafficLight/hook-mxp.log"
-```
-
-如果日志里没有 `event=Stop`，说明 Codex 这一轮没有调用结束 hook；如果有 `event=Stop state=done result=ok`，但灯仍然是黄灯，再检查是否还有其他任务处于 `working`。如果日志里一直是 `quota=none`，说明当前 hook payload 没有带额度字段。
-
-## 端到端验证
-
-项目内置一个轻量测试 runner：
-
-```bash
-swift run codex-light-mxp-tests
-```
-
-已经覆盖：
-
-- 多任务聚合优先级：`waiting` > `working` > 最近 `done` > `idle`
-- `done` 10 分钟过期后不参与聚合
-- hook 事件到状态的映射
-- `codex-light-mxp` / `codex-light-hook-mxp` 命令名约束
-- `clear` 清空任务
-- `quit` 状态可被 App 正确读取并退出
-- hook 日志行包含事件名、状态、任务、工作区、执行结果和 quota 摘要
-- quota 百分比裁剪、JSON 提取、旧状态文件兼容、quota 更新不影响红绿灯聚合状态
-- Codex app-server rate limit 响应解析、JSON-RPC framing、失败重试、采集失败时保留旧 quota、后台日志节流
-
-也可以手工做一次隔离 smoke test：
-
-```bash
-STATE=/tmp/codex-light-mxp-smoke.json
-CODEX_TRAFFIC_LIGHT_STATE_PATH="$STATE" codex-light-mxp clear
-CODEX_TRAFFIC_LIGHT_STATE_PATH="$STATE" codex-light-mxp quota --app-server --json
-CODEX_TRAFFIC_LIGHT_STATE_PATH="$STATE" codex-light-mxp quota --five-hour 72 --weekly 48
-printf '%s' '{"quota":{"fiveHourRemainingPercent":71,"weeklyRemainingPercent":47}}' \
-  | CODEX_TRAFFIC_LIGHT_STATE_PATH="$STATE" codex-light-mxp quota --stdin --json
-CODEX_TRAFFIC_LIGHT_STATE_PATH="$STATE" codex-light-mxp --task demo-a working
-CODEX_TRAFFIC_LIGHT_STATE_PATH="$STATE" codex-light-mxp status
-printf '%s' '{"hook_event_name":"Stop","last_assistant_message":"需要你确认授权后我才能继续。","cwd":"/tmp/demo","session_id":"demo-b"}' \
-  | CODEX_TRAFFIC_LIGHT_STATE_PATH="$STATE" codex-light-hook-mxp Stop
-CODEX_TRAFFIC_LIGHT_STATE_PATH="$STATE" codex-light-mxp status
-```
-
-预期最后一次 `status` 输出 `waiting`。
-
-## 开机自启
-
-安装开机自启：
-
-```bash
-./install-autostart.command
-```
-
-移除开机自启：
-
-```bash
-./uninstall-autostart.command
-```
-
-## 常见问题
-
-### `/hooks` 后没有自动变灯
-
-确认 `~/.codex/config.toml` 里使用的是：
-
-```text
-$HOME/.codex/bin/codex-light-hook-mxp
-```
-
-然后重新执行 `/hooks` 并信任新命令。
-
-### 命令找不到
-
-先运行：
-
-```bash
-./install-global-command.command
-```
-
-再确认：
-
-```bash
-which codex-light-mxp
-which codex-light-hook-mxp
-```
-
-### 需要重置残留任务
-
-运行：
-
-```bash
-codex-light-mxp clear
-```
-
-或从菜单栏选择“清空失联任务”。
-
-## Windows 版
-
-Windows sibling 位于 `Windows/`，使用系统自带 .NET Framework C# 编译器构建，不需要安装 .NET SDK。
-
-构建：
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\Windows\build-win.ps1
 ```
 
-构建产物：
+构建产物会生成到：
 
 ```text
-dist\windows\CodexTrafficLightWin.exe
+dist\windows\
+```
+
+主要文件：
+
+```text
+dist\windows\红绿灯.exe
 dist\windows\codex-light-mxp.exe
 dist\windows\codex-light-hook-mxp.exe
 ```
 
-运行悬浮交通灯：
+## 运行
+
+构建完成后，运行：
 
 ```powershell
-.\dist\windows\CodexTrafficLightWin.exe
+.\dist\windows\红绿灯.exe
 ```
 
-安装命令行工具到 `%USERPROFILE%\.codex\bin`，并幂等写入 `%USERPROFILE%\.codex\config.toml` 的 Windows hooks 配置：
+启动后会出现一个桌面悬浮红绿灯窗口，并在系统托盘显示图标。
+
+## 安装 Codex Hooks
+
+推荐使用 Windows 安装脚本：
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\Windows\install-global-command-win.ps1
 ```
 
-安装后在 Codex 中运行 `/hooks`，检查并信任 `codex-light-hook-mxp.exe`。只有完成信任后，红绿灯才会随任务开始、等待确认、完成而自动变黄/红/绿；额度只显示在底部 HUD。
+脚本会把命令行工具安装到：
 
-Windows hooks 示例在：
+```text
+%USERPROFILE%\.codex\bin
+```
+
+并把 Windows hooks 配置写入：
+
+```text
+%USERPROFILE%\.codex\config.toml
+```
+
+安装完成后，在 Codex 中运行：
+
+```text
+/hooks
+```
+
+然后检查并信任 `codex-light-hook-mxp.exe`。只有完成信任后，红绿灯才会随着 Codex 任务自动变色。
+
+Windows hooks 示例文件在：
 
 ```text
 Windows\hooks.example.toml
 ```
 
-Windows 运行时文件默认保存到：
+## 日常操作
+
+| 操作 | 功能 |
+| --- | --- |
+| 拖动悬浮窗 | 移动红绿灯位置 |
+| 点击标题栏关闭按钮 | 关闭窗口 |
+| 点击标题栏最小化按钮 | 隐藏窗口 |
+| 点击设置按钮 | 打开设置面板 |
+| 点击刷新图标 | 手动刷新额度 |
+| 双击托盘图标 | 显示或隐藏窗口 |
+| 右键托盘图标 | 打开菜单 |
+
+托盘菜单可以手动切换：
+
+- 黄灯：正在干活
+- 绿灯：完成验收
+- 红灯：等你回复
+- 全暗：空闲
+
+也可以清空失联任务或退出程序。
+
+## 运行时文件
+
+Windows 版默认把状态、偏好和日志保存到：
 
 ```text
 %APPDATA%\CodexTrafficLight\state.json
@@ -341,5 +149,114 @@ Windows 运行时文件默认保存到：
 %APPDATA%\CodexTrafficLight\quota-mxp.log
 ```
 
-Windows 版保留 macOS 版的红黄绿交通灯视觉、状态聚合规则、hook 命令、quota 命令和 `codex app-server --stdio` / `account/rateLimits/read` 额度读取协议。
+如需隔离测试，可以通过环境变量指定状态文件：
 
+```powershell
+$env:CODEX_TRAFFIC_LIGHT_STATE_PATH="C:\Temp\codex-light-state.json"
+```
+
+## 额度显示
+
+红绿灯会尝试通过本机 Codex app-server 读取额度：
+
+```text
+codex app-server --stdio
+account/rateLimits/read
+```
+
+浮窗底部显示：
+
+- `5小时` 剩余额度百分比
+- `1周` 剩余额度百分比
+
+如果 app-server 暂时不可用，程序会保留上一次成功读取的额度，不会编造数字。
+
+## 命令行工具
+
+安装后可以使用：
+
+```powershell
+codex-light-mxp working
+codex-light-mxp done
+codex-light-mxp waiting
+codex-light-mxp idle
+codex-light-mxp status
+codex-light-mxp clear
+codex-light-mxp quit
+codex-light-mxp quota --app-server
+```
+
+手动写入额度：
+
+```powershell
+codex-light-mxp quota --five-hour 72 --weekly 48
+```
+
+从 JSON 标准输入提取额度：
+
+```powershell
+'{"quota":{"fiveHourRemainingPercent":71,"weeklyRemainingPercent":47}}' | codex-light-mxp quota --stdin --json
+```
+
+## 常见问题
+
+### 红绿灯不会自动变色
+
+请检查：
+
+- 是否运行过 `Windows\install-global-command-win.ps1`
+- 是否在 Codex 中运行过 `/hooks`
+- 是否信任了 `codex-light-hook-mxp.exe`
+- `%USERPROFILE%\.codex\config.toml` 中的 hook 路径是否正确
+
+也可以查看日志：
+
+```text
+%APPDATA%\CodexTrafficLight\hook-mxp.log
+```
+
+### 一直没有额度
+
+先确认 Codex 本身可以正常使用，然后查看：
+
+```text
+%APPDATA%\CodexTrafficLight\quota-mxp.log
+```
+
+如果 Codex app-server 没有返回可识别的额度字段，底部会显示 `--` 或保留旧值。
+
+### 想重置状态
+
+可以从托盘菜单选择“清空失联任务”，也可以运行：
+
+```powershell
+codex-light-mxp clear
+```
+
+### 想关闭提示音
+
+右键托盘图标，选择“静音提示音”。
+
+## 和原 macOS 版的关系
+
+原项目主要面向 macOS，包含 Swift 菜单栏应用、悬浮窗、命令行工具和 Codex Hooks 集成。
+
+本仓库是在原项目基础上做的 Windows 修改版，重点是：
+
+- 增加 Windows WinForms 悬浮红绿灯
+- 增加 Windows 构建脚本
+- 增加 Windows hooks 安装脚本
+- 增加 Windows 托盘菜单、提示音和运行时路径
+- 适配 `%APPDATA%\CodexTrafficLight` 状态目录
+
+原作者项目地址：
+
+```text
+https://github.com/langkonzil/codex-traffic-light-mxp.git
+```
+
+## 许可证
+
+本项目基于 Apache License 2.0 开源项目修改，并继续使用 Apache License 2.0。
+
+请保留原项目作者信息、许可证文本和必要的修改说明。
