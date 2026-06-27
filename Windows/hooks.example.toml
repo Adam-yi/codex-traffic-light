@@ -1,0 +1,46 @@
+﻿# Windows Codex Traffic Light hooks template
+#
+# Recommended: run Windows\install-global-command-win.ps1 instead of copying this file.
+# The installer writes this block into %USERPROFILE%\.codex\config.toml with the real
+# absolute path to codex-light-hook-mxp.exe, then you should run /hooks in Codex and trust it.
+#
+# TOML commands need escaped backslashes. Do not write "%USERPROFILE%" directly in command.
+# Replace the sample path below with your actual path if you install manually.
+
+[[hooks.UserPromptSubmit]]
+[[hooks.UserPromptSubmit.hooks]]
+type = "command"
+command = "C:\\Users\\1\\.codex\\bin\\codex-light-hook-mxp.exe UserPromptSubmit"
+timeout = 5
+statusMessage = "Codex traffic light: working"
+
+[[hooks.PreToolUse]]
+matcher = ".*"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "C:\\Users\\1\\.codex\\bin\\codex-light-hook-mxp.exe PreToolUse"
+timeout = 5
+statusMessage = "Codex traffic light: working"
+
+[[hooks.PermissionRequest]]
+matcher = ".*"
+[[hooks.PermissionRequest.hooks]]
+type = "command"
+command = "C:\\Users\\1\\.codex\\bin\\codex-light-hook-mxp.exe PermissionRequest"
+timeout = 5
+statusMessage = "Codex traffic light: waiting"
+
+[[hooks.Stop]]
+[[hooks.Stop.hooks]]
+type = "command"
+command = "C:\\Users\\1\\.codex\\bin\\codex-light-hook-mxp.exe Stop"
+timeout = 5
+statusMessage = "Codex traffic light: done"
+
+[[hooks.SubagentStop]]
+matcher = ".*"
+[[hooks.SubagentStop.hooks]]
+type = "command"
+command = "C:\\Users\\1\\.codex\\bin\\codex-light-hook-mxp.exe SubagentStop"
+timeout = 5
+statusMessage = "Codex traffic light: subagent done"
