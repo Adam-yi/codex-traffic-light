@@ -43,7 +43,7 @@ static class Defaults {
   public static double DoneSeconds { get { return Env("CODEX_LIGHT_DONE_IDLE_SECONDS",600); } }
   public static double WaitingSeconds { get { return Env("CODEX_LIGHT_WAITING_ALERT_SECONDS",10); } }
   public static int DoneFlashMs { get { return (int)(Env("CODEX_LIGHT_DONE_FLASH_SECONDS",1.4)*1000); } }
-  public static int QuotaRefreshMs { get { return (int)(Env("CODEX_LIGHT_APP_SERVER_QUOTA_REFRESH_SECONDS",300)*1000); } }
+  public static int QuotaRefreshMs { get { return (int)(Env("CODEX_LIGHT_APP_SERVER_QUOTA_REFRESH_SECONDS",90)*1000); } }
   public static double SessionWaitingSeconds { get { return Env("CODEX_LIGHT_SESSION_WAITING_SECONDS",600); } }
   static double Env(string k,double f){double v;return double.TryParse(Environment.GetEnvironmentVariable(k),out v)&&v>0?v:f;}
 }
